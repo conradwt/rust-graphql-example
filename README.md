@@ -1,4 +1,4 @@
-# Example GraphQL Servers with Rust
+# Rust GraphQL Example
 
 ## Query: Members
 
