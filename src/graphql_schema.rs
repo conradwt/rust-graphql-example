@@ -6,14 +6,14 @@ use std::env;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 use dotenv::dotenv;
-use juniper::{EmptyMutation, RootNode};
+use juniper::{RootNode};
 
 use crate::schema::members;
 
 #[derive(Queryable)]
 struct Member {
-  id: i32,
-  name: String,
+  pub id: i32,
+  pub name: String,
   pub knockouts: i32,
   pub team_id: i32,
 }
