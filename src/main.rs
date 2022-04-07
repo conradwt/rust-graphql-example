@@ -17,13 +17,14 @@ use crate::graphql_schema::{create_schema, Schema};
 
 fn main() -> io::Result<()> {
   let schema = std::sync::Arc::new(create_schema());
+
   HttpServer::new(move || {
       App::new()
           .data(schema.clone())
           .service(web::resource("/graphql").route(web::post().to_async(graphql)))
           .service(web::resource("/graphiql").route(web::get().to(graphiql)))
   })
-  .bind("localhost:8080")?
+  .bind(("127.0.0.1", 8080))?
   .run()
 }
 
