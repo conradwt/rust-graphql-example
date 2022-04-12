@@ -24,10 +24,6 @@ ENV APP_PATH /app
 # This is important, see https://github.com/rust-lang/docker-rust/issues/85
 ENV RUSTFLAGS="-C target-feature=-crt-static"
 
-# create application user.
-# RUN addgroup --gid 1000 darnoc && \
-#   adduser --uid 1000 --ingroup darnoc --shell /bin/bash --home darnoc
-
 #
 # https://pkgs.alpinelinux.org/packages?name=&branch=v3.14
 #
@@ -55,16 +51,28 @@ RUN apk -U add --no-cache \
 # set the workdir
 WORKDIR $APP_PATH
 
+RUN USER=root cargo init --bin
+
+# build diesel first as there may be no changes and caching will be used
+RUN echo "building diesel-cli" && \
+  cargo install diesel_cli --root ${APP_PATH} --bin diesel --force --no-default-features --features postgres
+
 # copy over your manifests
 COPY ./Cargo.lock ./Cargo.lock
 COPY ./Cargo.toml ./Cargo.toml
 
+# this build step will cache your dependencies
+RUN cargo build --release
+RUN rm -rf ./src ./target/release/deps/rust-graphql-example*
+
 # copy your source tree
 COPY ./src ./src
 
-# this build step will cache your dependencies
+# build the release
 RUN cargo build --release
-RUN strip target/release/rust-graphql-example
+
+# https://developer.apple.com/library/archive/documentation/Performance/Conceptual/CodeFootprint/Articles/CompilerOptions.html
+# RUN strip target/release/rust-graphql-example
 
 ##
 ## Production
@@ -84,8 +92,21 @@ RUN apk -U add --no-cache \
   rm -rf /var/cache/apk/* && \
   mkdir -p $APP_PATH
 
+# https://perso.esiee.fr/~llorense/Labo5201/mc528x/PDFs/_read4-d5280.pdf
+# create application user.
+RUN addgroup --gid 1000 darnoc && \
+  adduser --uid 1000 \
+          --ingroup darnoc \
+          --shell /bin/sh \
+          --home ${APP_PATH} -D darnoc
+
 # copy the build artifact from the build stage
-COPY --from=base /app/target/release/rust-graphql-example .
+COPY --from=base --chown=darnoc:darnoc /app/target/release/rust-graphql-example /app/bin/rust-graphql-example
+COPY --from=base --chown=darnoc:darnoc /app/bin/diesel /app/bin/diesel
+
+# https://docs.docker.com/engine/reference/builder/#copy
+# TODO copy binaries and migrations and set their user and group
+COPY --chown=darnoc:darnoc ./migrations ${APP_PATH}/migrations
 
 HEALTHCHECK CMD curl http://127.0.0.1/ || exit 1
 
@@ -94,4 +115,4 @@ USER darnoc
 ENTRYPOINT ["/sbin/tini", "--"]
 
 # set the startup command to run your binary
-CMD ["./rust-graphql-example"]
+CMD ["/bin/sh", "-x", "-c", "/app/bin/diesel migration run && /app/bin/rust-graphql-example"]
