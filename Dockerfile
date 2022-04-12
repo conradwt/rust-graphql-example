@@ -49,7 +49,7 @@ RUN apk -U add --no-cache \
 #   mkdir -p $APP_PATH
 
 # set the workdir
-WORKDIR $APP_PATH
+WORKDIR ${APP_PATH}
 
 RUN USER=root cargo init --bin
 
@@ -91,6 +91,9 @@ RUN apk -U add --no-cache \
   tini=0.19.0-r0 && \
   rm -rf /var/cache/apk/* && \
   mkdir -p $APP_PATH
+
+# set the workdir
+WORKDIR ${APP_PATH}
 
 # https://perso.esiee.fr/~llorense/Labo5201/mc528x/PDFs/_read4-d5280.pdf
 # create application user.
