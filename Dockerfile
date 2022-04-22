@@ -2,7 +2,7 @@
 ## Base
 ##
 
-FROM rust:1.60.0-alpine3.14 as base
+FROM rust:1.60.0-alpine3.15 as base
 
 # labels from https://github.com/opencontainers/image-spec/blob/master/annotations.md
 LABEL org.opencontainers.image.authors=conradwt@gmail.com
@@ -25,14 +25,14 @@ ENV APP_PATH /app
 ENV RUSTFLAGS="-C target-feature=-crt-static"
 
 #
-# https://pkgs.alpinelinux.org/packages?name=&branch=v3.14
+# https://pkgs.alpinelinux.org/packages?name=&branch=v3.15
 #
 
 # install build and runtime dependencies
 RUN apk -U add --no-cache \
-  libpq=13.6-r0 \
-  musl-dev=1.2.2-r3 \
-  postgresql-dev=13.6-r0 \
+  libpq=14.2-r0 \
+  musl-dev=1.2.2-r7 \
+  postgresql14-dev=14.2-r0 \
   rm -rf /var/cache/apk/* && \
   mkdir -p $APP_PATH
 
@@ -78,7 +78,7 @@ RUN cargo build --release
 ## Production
 ##
 
-FROM alpine:3.14.6
+FROM alpine:3.15.4
 
 # environment variables
 ENV APP_PATH /app
@@ -86,8 +86,8 @@ ENV APP_PATH /app
 # install build and runtime dependencies
 RUN apk -U add --no-cache \
   ca-certificates=20211220-r0 \
-  curl=7.79.1-r0 \
-  libgcc=10.3.1_git20210424-r2 \
+  curl=7.80.0-r0 \
+  libgcc=10.3.1_git20211027-r0 \
   tini=0.19.0-r0 && \
   rm -rf /var/cache/apk/* && \
   mkdir -p $APP_PATH
@@ -104,8 +104,8 @@ RUN addgroup --gid 1000 darnoc && \
           --home ${APP_PATH} -D darnoc
 
 # copy the build artifact from the build stage
-COPY --from=base --chown=darnoc:darnoc /app/target/release/rust-graphql-example /app/bin/rust-graphql-example
-COPY --from=base --chown=darnoc:darnoc /app/bin/diesel /app/bin/diesel
+COPY --from=base --chown=darnoc:darnoc /app/target/release/rust-graphql-example .
+COPY --from=base --chown=darnoc:darnoc /app/bin/diesel .
 
 # https://docs.docker.com/engine/reference/builder/#copy
 # TODO copy binaries and migrations and set their user and group
