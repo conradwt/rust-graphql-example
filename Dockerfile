@@ -2,7 +2,7 @@
 ## Base
 ##
 
-FROM rust:1.60.0-alpine3.15 as base
+FROM rust:1.61.0-alpine3.15 as base
 
 # labels from https://github.com/opencontainers/image-spec/blob/master/annotations.md
 LABEL org.opencontainers.image.authors=conradwt@gmail.com
@@ -30,9 +30,9 @@ ENV RUSTFLAGS="-C target-feature=-crt-static"
 
 # install build and runtime dependencies
 RUN apk -U add --no-cache \
-  libpq=14.2-r0 \
+  libpq=14.3-r0 \
   musl-dev=1.2.2-r7 \
-  postgresql14-dev=14.2-r0 \
+  postgresql14-dev=14.3-r0 \
   rm -rf /var/cache/apk/* && \
   mkdir -p $APP_PATH
 
@@ -86,7 +86,7 @@ ENV APP_PATH /app
 # install build and runtime dependencies
 RUN apk -U add --no-cache \
   ca-certificates=20211220-r0 \
-  curl=7.80.0-r0 \
+  curl=7.80.0-r1 \
   libgcc=10.3.1_git20211027-r0 \
   tini=0.19.0-r0 && \
   rm -rf /var/cache/apk/* && \
