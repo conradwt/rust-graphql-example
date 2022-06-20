@@ -2,7 +2,7 @@
 ## Base
 ##
 
-FROM rust:1.61.0-alpine3.15 as base
+FROM rust:1.61.0-alpine3.16 as base
 
 # labels from https://github.com/opencontainers/image-spec/blob/master/annotations.md
 LABEL org.opencontainers.image.authors=conradwt@gmail.com
@@ -25,28 +25,16 @@ ENV APP_PATH /app
 ENV RUSTFLAGS="-C target-feature=-crt-static"
 
 #
-# https://pkgs.alpinelinux.org/packages?name=&branch=v3.15
+# https://pkgs.alpinelinux.org/packages?name=&branch=v3.16
 #
 
 # install build and runtime dependencies
 RUN apk -U add --no-cache \
-  libpq=14.3-r0 \
-  musl-dev=1.2.2-r7 \
-  postgresql14-dev=14.3-r0 \
+  libpq=14.4-r0 \
+  musl-dev=1.2.3-r0 \
+  postgresql14-dev=14.4-r0 \
   rm -rf /var/cache/apk/* && \
   mkdir -p $APP_PATH
-
-# RUN apk -U add --no-cache \
-#   build-base=0.5-r2 \
-#   bzip2=1.0.8-r1 \
-#   ca-certificates=20211220-r0 \
-#   curl=7.79.1-r0 \
-#   fontconfig=2.13.1-r4 \
-#   postgresql-dev=13.6-r0 \
-#   tini=0.19.0-r0 \
-#   tzdata=2022a-r0 && \
-#   rm -rf /var/cache/apk/* && \
-#   mkdir -p $APP_PATH
 
 # set the workdir
 WORKDIR ${APP_PATH}
@@ -78,7 +66,7 @@ RUN cargo build --release
 ## Production
 ##
 
-FROM alpine:3.15.4
+FROM alpine:3.16.0
 
 # environment variables
 ENV APP_PATH /app
@@ -86,8 +74,8 @@ ENV APP_PATH /app
 # install build and runtime dependencies
 RUN apk -U add --no-cache \
   ca-certificates=20211220-r0 \
-  curl=7.80.0-r1 \
-  libgcc=10.3.1_git20211027-r0 \
+  curl=7.83.1-r1 \
+  libgcc=11.2.1_git20220219-r2 \
   tini=0.19.0-r0 && \
   rm -rf /var/cache/apk/* && \
   mkdir -p $APP_PATH
