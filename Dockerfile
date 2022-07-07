@@ -2,7 +2,7 @@
 ## Base
 ##
 
-FROM rust:1.61.0-alpine3.16 as base
+FROM rust:1.62.0-alpine3.16 as base
 
 # labels from https://github.com/opencontainers/image-spec/blob/master/annotations.md
 LABEL org.opencontainers.image.authors=conradwt@gmail.com
@@ -71,10 +71,14 @@ FROM alpine:3.16.0
 # environment variables
 ENV APP_PATH /app
 
+#
+# https://pkgs.alpinelinux.org/packages?name=&branch=v3.16
+#
+
 # install build and runtime dependencies
 RUN apk -U add --no-cache \
   ca-certificates=20211220-r0 \
-  curl=7.83.1-r1 \
+  curl=7.83.1-r2 \
   libgcc=11.2.1_git20220219-r2 \
   tini=0.19.0-r0 && \
   rm -rf /var/cache/apk/* && \
