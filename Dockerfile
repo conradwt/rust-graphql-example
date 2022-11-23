@@ -2,7 +2,7 @@
 ## Base
 ##
 
-FROM rust:1.62.0-alpine3.16 as base
+FROM rust:1.65.0-alpine3.16 as base
 
 # labels from https://github.com/opencontainers/image-spec/blob/master/annotations.md
 LABEL org.opencontainers.image.authors=conradwt@gmail.com
@@ -30,9 +30,9 @@ ENV RUSTFLAGS="-C target-feature=-crt-static"
 
 # install build and runtime dependencies
 RUN apk -U add --no-cache \
-  libpq=14.4-r0 \
-  musl-dev=1.2.3-r0 \
-  postgresql14-dev=14.4-r0 \
+  libpq=14.5-r0 \
+  musl-dev=1.2.3-r2 \
+  postgresql14-dev=14.5-r0 \
   rm -rf /var/cache/apk/* && \
   mkdir -p $APP_PATH
 
@@ -77,8 +77,8 @@ ENV APP_PATH /app
 
 # install build and runtime dependencies
 RUN apk -U add --no-cache \
-  ca-certificates=20211220-r0 \
-  curl=7.83.1-r2 \
+  ca-certificates=20220614-r0 \
+  curl=7.83.1-r4 \
   libgcc=11.2.1_git20220219-r2 \
   tini=0.19.0-r0 && \
   rm -rf /var/cache/apk/* && \
@@ -91,9 +91,9 @@ WORKDIR ${APP_PATH}
 # create application user.
 RUN addgroup --gid 1000 darnoc && \
   adduser --uid 1000 \
-          --ingroup darnoc \
-          --shell /bin/sh \
-          --home ${APP_PATH} -D darnoc
+  --ingroup darnoc \
+  --shell /bin/sh \
+  --home ${APP_PATH} -D darnoc
 
 # copy the build artifact from the build stage
 COPY --from=base --chown=darnoc:darnoc /app/target/release/rust-graphql-example .
